@@ -26,3 +26,23 @@ class UserSerializer(serializers.ModelSerializer):
             user.set_password(password)
             user.save()
         return user
+
+
+
+class UserListSerializer(UserSerializer):
+    count_posts = serializers.IntegerField(read_only=True)
+    count_followers = serializers.IntegerField(read_only=True)
+    count_following = serializers.IntegerField(read_only=True)
+
+    class Meta(UserSerializer.Meta):
+        fields = ["id", "username", "image", "count_posts", "count_followers", "count_following"]
+
+
+class UserDetailSerializer(UserListSerializer):
+
+    class Meta(UserListSerializer.Meta):
+        fields = UserListSerializer.Meta.fields + ["bio"]
+
+class UserProfileSerializer(UserSerializer):
+    class Meta(UserSerializer.Meta):
+        fields = ["id", "email", "username", "image", "bio"]

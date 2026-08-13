@@ -11,7 +11,7 @@ class UsesrAdmin(BaseUserAdmin):
     search_fields = ["email", "username"]
     fieldsets = BaseUserAdmin.fieldsets + (
         ("Additional info", {
-            "fields": ["bio", "image"]
+            "fields": ["bio", "image", "following"]
         }),
     )
     add_fieldsets = (

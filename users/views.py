@@ -13,7 +13,6 @@ from rest_framework import status
 
 from users.serializers import UserSerializer, UserListSerializer, UserDetailSerializer, UserProfileSerializer
 
-from users.pagination import CustomPagination
 
 class UserCreateView(CreateAPIView):
     serializer_class = UserSerializer

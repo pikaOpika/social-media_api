@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'posts',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -97,7 +98,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "Europe/Kyiv"
 
 USE_I18N = True
 
@@ -137,6 +138,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ],
     "DEFAULT_PAGINATION_CLASS": "users.pagination.CustomPagination",
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
@@ -144,4 +146,26 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
 }
+
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_TIMEZONE = TIME_ZONE
+
+
+CELERY_BEAT_SCHEDULE = {
+    "publish-due-posts-every-minute": {
+        "task": "posts.tasks.publish_due_posts",
+        "schedule": 60.0,
+    },
+}
+
+
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Social-Media API",
+    "DESCRIPTION": "write post comment them like follow and unfollow",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
+
 

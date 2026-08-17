@@ -28,8 +28,8 @@ class PostViewSet(viewsets.ModelViewSet):
         queryset = self.queryset.annotate(
             likes=Count("liked_by", distinct=True),
             count_comments=Count("comments", distinct=True)
-        )
-        return queryset.select_related("author").prefetch_related("hashtags")
+        ).select_related("author").prefetch_related("hashtags")
+        return queryset.filter(Q(is_published=True) | Q(author=self.request.user))
 
     def get_serializer_class(self):
         if self.action in ["create", "partial_update", "update"]:

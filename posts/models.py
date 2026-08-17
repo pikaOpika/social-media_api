@@ -35,6 +35,11 @@ class Post(models.Model):
     def __str__(self):
         return f"Post: {self.title}"
 
+    def save(self, *args, **kwargs):
+        if self.publish_at is None:
+            self.is_published = True
+        super().save(*args, **kwargs)
+
 
 
 class Comment(models.Model):

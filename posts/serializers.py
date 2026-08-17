@@ -36,7 +36,7 @@ class PostCreateUpdateSerializer(PostSerializer):
     )
 
     class Meta(PostSerializer.Meta):
-        fields = ["id", "title", "content", "image", "hashtags"]
+        fields = ["id", "title", "content", "image", "hashtags", "publish_at"]
 
 
     @staticmethod
@@ -72,6 +72,9 @@ class PostCreateUpdateSerializer(PostSerializer):
 class PostDetailSerializer(PostSerializer):
     hashtags = serializers.SlugRelatedField(slug_field="name", many=True, queryset=Hashtag.objects.all())
     author = serializers.CharField(source="author.username", read_only=True)
+
+    class Meta(PostSerializer.Meta):
+        fields = PostSerializer.Meta.fields + ["publish_at"]
 
 
 

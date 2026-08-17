@@ -166,6 +166,14 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "write post comment them like follow and unfollow",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "TAGS": [
+        {"name": "auth", "description": "Registration, login, token refresh and logout"},
+        {"name": "users", "description": "Profiles, search, follow and unfollow"},
+        {"name": "posts", "description": "Posts, likes, feed and hashtags"},
+        {"name": "comments", "description": "Comments on posts"},
+        {"name": "profile", "description": "Watch your profile and edit it"},
+        {"name": "register", "description": "For register your account"},
+    ],
 }
 
 

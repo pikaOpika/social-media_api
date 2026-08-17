@@ -7,6 +7,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework import filters
+from rest_framework import serializers
+
+from drf_spectacular.utils import extend_schema, inline_serializer
 
 from posts.models import Post, Comment
 from posts.serializers import (
@@ -16,7 +19,9 @@ from posts.serializers import (
 )
 from posts.permissions import IsAuthorOrReadOnly
 
+from social_media_settings.schema import DETAIL_RESPONSE
 
+@extend_schema(tags=["posts"])
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostListSerializer
@@ -40,6 +45,7 @@ class PostViewSet(viewsets.ModelViewSet):
             return PostDetailSerializer
         return PostSerializer
 
+    @extend_schema(responses=PostListSerializer(many=True))
     @action(detail=False, methods=["GET"])
     def feed(self, request):
         data = self.get_queryset().filter(
@@ -49,6 +55,7 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
+    @extend_schema(request=None, responses={200: DETAIL_RESPONSE})
     @action(detail=True, methods=["POST"], permission_classes=[IsAuthenticated])
     def like(self, request, pk):
         post = self.get_object()
@@ -58,6 +65,7 @@ class PostViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(request=None, responses={200: DETAIL_RESPONSE})
     @action(detail=True, methods=["POST"], permission_classes=[IsAuthenticated])
     def unlike(self, request, pk):
         post = self.get_object()
@@ -67,6 +75,7 @@ class PostViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(responses=PostListSerializer(many=True))
     @action(detail=False, methods=["GET"])
     def liked_posts(self, request):
         page = self.paginate_queryset(self.get_queryset().filter(liked_by=request.user))
@@ -78,7 +87,7 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
 
-
+@extend_schema(tags=["comments"])
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [IsAuthorOrReadOnly]

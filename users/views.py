@@ -11,14 +11,18 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 
+from drf_spectacular.utils import extend_schema
+
 from users.serializers import UserSerializer, UserListSerializer, UserDetailSerializer, UserProfileSerializer
 
+from social_media_settings.schema import DETAIL_RESPONSE
 
+@extend_schema(tags=["register"])
 class UserCreateView(CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny,]
 
-
+@extend_schema(tags=["users"])
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = get_user_model().objects.all()
     serializer_class = UserSerializer
@@ -34,12 +38,13 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
     def get_serializer_class(self):
-        if self.action == "list":
+        if self.action in ["list", "followers", "following"]:
             return UserListSerializer
         if self.action == "retrieve":
             return UserDetailSerializer
         return UserSerializer
 
+    @extend_schema(request=None, responses=DETAIL_RESPONSE)
     @action(detail=True, methods=["POST"])
     def follow(self, request, pk=None):
         current_user = self.request.user
@@ -51,6 +56,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         )
         return Response({"detail": "You successfully follow user"}, status=status.HTTP_200_OK)
 
+    @extend_schema(request=None, responses=DETAIL_RESPONSE)
     @action(detail=True, methods=["POST"])
     def unfollow(self, request, pk=None):
         current_user = self.request.user
@@ -58,22 +64,25 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         current_user.following.remove(user)
         return Response({"detail": "You successfully unfollow"}, status=status.HTTP_200_OK)
 
+    @extend_schema(responses=UserListSerializer(many=True))
     @action(detail=True, methods=["GET"])
     def following(self, request, pk):
         user = self.get_object()
-        data = user.following.all()
+        data = self.get_queryset().filter(followers=user)
         page = self.paginate_queryset(data)
-        serializer = UserListSerializer(page, many=True)
+        serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
+    @extend_schema(responses=UserListSerializer(many=True))
     @action(detail=True, methods=["GET"])
     def followers(self, request, pk):
         user = self.get_object()
-        data = user.followers.all()
+        data = self.get_queryset().filter(following=user)
         page = self.paginate_queryset(data)
-        serializer = UserListSerializer(page, many=True)
+        serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
+@extend_schema(tags=["profile"])
 class UserRetrieveUpdateView(RetrieveUpdateAPIView):
     queryset = get_user_model().objects.all()
     serializer_class = UserProfileSerializer
